@@ -13,7 +13,7 @@ const ACCENTS = [
 // ─── The 6 requirements → patterns ──────────────────────────────────────────
 const PATTERNS = [
   {
-    need: "I need to check if someone's eligible before they spend time filling in the whole form.",
+    need: "Before anyone spends time filling things in, I need a way to check they're actually eligible.",
     pattern: "Radios with conditional reveal",
     type: "Component",
     url: "https://design-system.service.gov.uk/components/radios/",
@@ -21,7 +21,7 @@ const PATTERNS = [
     mockUI: "eligibility",
   },
   {
-    need: "There are a lot of sections to complete. I need people to see the whole journey and do it in their own order.",
+    need: "There's quite a lot to get through. I want people to see what's involved upfront and tackle it in whatever order works for them.",
     pattern: "Task list pages",
     type: "Pattern",
     url: "https://design-system.service.gov.uk/patterns/task-list-pages/",
@@ -29,7 +29,7 @@ const PATTERNS = [
     mockUI: "tasklist",
   },
   {
-    need: "I need to collect personal details — name, date of birth, address. Each one has to be simple and accessible.",
+    need: "I need a way for people to add their personal details — name, date of birth, address — without it feeling overwhelming.",
     pattern: "Date input",
     type: "Component",
     url: "https://design-system.service.gov.uk/components/date-input/",
@@ -37,7 +37,7 @@ const PATTERNS = [
     mockUI: "date",
   },
   {
-    need: "People need to upload a photo and documents. Some will be on their phone, some on a desktop.",
+    need: "At some point they'll need to send us a photo and some documents. Lots of people will just be doing this on their phone.",
     pattern: "File upload",
     type: "Component",
     url: "https://design-system.service.gov.uk/components/file-upload/",
@@ -45,7 +45,7 @@ const PATTERNS = [
     mockUI: "upload",
   },
   {
-    need: "People will make mistakes. I need to tell them what went wrong and how to fix it — clearly.",
+    need: "People are going to get things wrong sometimes. I need to make sure they know exactly what to fix, without making them feel stupid.",
     pattern: "Error summary + error message",
     type: "Component",
     url: "https://design-system.service.gov.uk/components/error-summary/",
@@ -53,7 +53,7 @@ const PATTERNS = [
     mockUI: "error",
   },
   {
-    need: "At the end, people need to know it worked. They need a reference number and to know what happens next.",
+    need: "When they're done, I want them to feel confident it actually went through. Give them a reference number and tell them what happens next.",
     pattern: "Confirmation page + panel",
     type: "Pattern",
     url: "https://design-system.service.gov.uk/patterns/confirmation-pages/",
