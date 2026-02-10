@@ -89,8 +89,39 @@ const CATEGORY_ICONS = {
   ),
 };
 
-// ─── Semantic Search via Anthropic API ───────────────────────────────────────
+// ─── Semantic Search via server-side API route ──────────────────────────────
 async function semanticSearch(query, apiKey) {
+  // Try server-side route first (Vercel deployment with ANTHROPIC_API_KEY env var)
+  try {
+    const serverResponse = await fetch("/api/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+
+    if (serverResponse.ok) {
+      const { indices } = await serverResponse.json();
+      return indices
+        .filter((i) => i >= 0 && i < PATTERNS.length)
+        .slice(0, 5)
+        .map((i) => PATTERNS[i]);
+    }
+
+    // If server route returns 500 (no key configured), fall through to client-side
+    const serverErr = await serverResponse.json().catch(() => ({}));
+    if (serverResponse.status !== 500) {
+      throw new Error(serverErr?.error || `Server error: ${serverResponse.status}`);
+    }
+  } catch (err) {
+    // Network error (no /api route) or 500 — fall through to client-side
+    if (err.message && !err.message.includes("ANTHROPIC_API_KEY")) {
+      console.info("Server route unavailable, trying client-side API call");
+    }
+  }
+
+  // Fallback: direct client-side call (requires user-provided API key)
+  if (!apiKey) throw new Error("No API key available");
+
   const patternSummaries = PATTERNS.map(
     (p, i) => `[${i}] ${p.name} (${p.system} / ${p.category}): ${p.description}`
   ).join("\n");
@@ -116,7 +147,7 @@ Their query: "${query}"
 Available patterns:
 ${patternSummaries}
 
-Return ONLY the indices of the top 5 most relevant patterns as a JSON array of numbers, ordered by relevance. Consider semantic meaning, not just keyword matching. For example, if someone asks about "showing errors" you should return error-related patterns even if they don't use the exact word.
+Return ONLY the indices of the top 5 most relevant patterns as a JSON array of numbers, ordered by relevance. Consider semantic meaning, not just keyword matching.
 
 Respond with ONLY a JSON array like [3,7,12,0,5] — no other text.`,
         },
@@ -191,17 +222,16 @@ export default function GDSPatternSearch() {
       setResults(null);
 
       try {
-        let matches;
-        if (apiKey.trim()) {
-          matches = await semanticSearch(trimmed, apiKey.trim());
-        } else {
-          matches = fallbackSearch(trimmed);
-        }
+        const matches = await semanticSearch(trimmed, apiKey.trim());
         setResults(matches);
       } catch (err) {
-        setError(err.message);
-        // Fall back to keyword search on API error
-        setResults(fallbackSearch(trimmed));
+        // If no server route and no client key, use keyword silently
+        if (!apiKey.trim() && err.message === "No API key available") {
+          setResults(fallbackSearch(trimmed));
+        } else {
+          setError(err.message);
+          setResults(fallbackSearch(trimmed));
+        }
       } finally {
         setLoading(false);
       }
