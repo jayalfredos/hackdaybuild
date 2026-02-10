@@ -241,7 +241,7 @@ export default function GDSPatternSearch() {
             WebkitTextFillColor: "transparent",
           }}
         >
-          GDS Pattern Search
+          Pattern Matcher
         </h1>
 
         <p
