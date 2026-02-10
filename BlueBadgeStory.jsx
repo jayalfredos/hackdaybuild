@@ -416,14 +416,14 @@ export default function BlueBadgeStory() {
                 margin: "0 0 20px",
               }}
             >
-              How do you build a service<br />that really helps people?
+              Building an 'Apply for<br />a Blue Badge' service
             </h1>
           </FadeIn>
 
           <FadeIn delay={0.2}>
             <p style={{ fontSize: "clamp(17px, 2.5vw, 20px)", lineHeight: 1.55, color: "rgba(255,255,255,0.8)", margin: "0 0 40px", maxWidth: 560 }}>
-              Follow along as we build an 'Apply for a Blue Badge' service
-              using the GOV.UK Design System — no reinventing the wheel.
+              A step-by-step look at how one council officer used the
+              GOV.UK Design System to build a service for 2.35 million people.
             </p>
           </FadeIn>
 
@@ -452,16 +452,16 @@ export default function BlueBadgeStory() {
           <div style={{ display: "flex", gap: 28, alignItems: "flex-start", flexWrap: "wrap" }}>
             <div style={{ flex: "1 1 320px" }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: "#2a5a8a", letterSpacing: "0.03em", margin: "0 0 10px" }}>
-                First, the people
+                The brief
               </p>
               <h2 style={{ fontSize: "clamp(26px, 4vw, 36px)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.15, margin: "0 0 16px" }}>
                 Meet Sarah
               </h2>
               <p style={{ fontSize: 17, lineHeight: 1.7, color: "#3d3d40", margin: "0 0 16px" }}>
-                Sarah works at a local council. She's been asked to build something that makes
-                a real difference — a way for people to apply for a Blue Badge online, instead of
-                filling in paper forms and posting them off. The good news? She doesn't have to
-                figure it all out alone.
+                Sarah is a service officer at a local council. She needs to replace the paper
+                Blue Badge application with a digital service. Instead of starting from scratch,
+                she uses the GOV.UK Design System — tested, accessible patterns that millions
+                of people already know how to use.
               </p>
             </div>
             <div
@@ -475,7 +475,7 @@ export default function BlueBadgeStory() {
               }}
             >
               <p style={{ fontSize: 15, lineHeight: 1.55, color: "#1d1d1f", margin: 0, fontStyle: "italic" }}>
-                "I want to help people park closer to where they need to go — without the hassle."
+                "I need to help residents who need a Blue Badge apply for one online."
               </p>
               <p style={{ fontSize: 13, color: "#7a7a80", margin: "10px 0 0", fontWeight: 500 }}>
                 — Sarah
@@ -492,12 +492,12 @@ export default function BlueBadgeStory() {
             The story so far
           </p>
           <h2 style={{ fontSize: "clamp(24px, 3.5vw, 32px)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 20px" }}>
-            What's a Blue Badge, anyway?
+            What is a Blue Badge?
           </h2>
           <p style={{ fontSize: 17, lineHeight: 1.7, color: "#3d3d40", margin: "0 0 24px" }}>
-            If you or someone you care for has a disability or health condition, a Blue Badge
-            means you can park closer to where you need to be. It's a small thing that makes
-            a huge difference to millions of people's daily lives.
+            A Blue Badge lets people with disabilities or health conditions park closer
+            to their destination. Over 2.35 million people in the UK hold one. Until recently,
+            applying meant paper forms, posting documents, and weeks of waiting.
           </p>
         </FadeIn>
 
@@ -562,9 +562,9 @@ export default function BlueBadgeStory() {
 
         {/* Who it's for */}
         <FadeIn>
-          <h3 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 6px" }}>It's not just one type of person</h3>
+          <h3 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 6px" }}>Who applies</h3>
           <p style={{ fontSize: 15, color: "#5a5a60", margin: "0 0 16px", lineHeight: 1.5 }}>
-            The service needs to work for everyone who might apply:
+            The service needs to work for three types of applicant:
           </p>
         </FadeIn>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, marginBottom: 32 }}>
@@ -591,10 +591,10 @@ export default function BlueBadgeStory() {
             borderRadius: 16,
             padding: "24px 28px",
           }}>
-            <h3 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 12px", color: "#2a2a2e" }}>How she'll do it</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 12px", color: "#2a2a2e" }}>Sarah's approach</h3>
             <p style={{ fontSize: 15, color: "#5a5a60", margin: "0 0 14px", lineHeight: 1.5 }}>
-              Sarah's secret weapon is the GOV.UK Design System — a library of patterns and components
-              that have already been tested with real people. Here's her plan:
+              The GOV.UK Design System provides patterns and components already tested with
+              real users. Sarah follows four principles:
             </p>
             <div style={{ display: "grid", gap: 10 }}>
               {[
@@ -619,10 +619,10 @@ export default function BlueBadgeStory() {
       <section style={{ maxWidth: 680, margin: "0 auto", padding: "56px 24px 0" }}>
         <FadeIn>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", margin: "0 0 8px" }}>
-            What do people actually need?
+            User needs
           </h2>
           <p style={{ fontSize: 15, color: "#5a5a60", margin: "0 0 20px", lineHeight: 1.5 }}>
-            Sarah talked to real applicants. Here's what matters most to them:
+            Sarah started by researching what applicants need from the service:
           </p>
         </FadeIn>
 
@@ -663,10 +663,10 @@ export default function BlueBadgeStory() {
             ))}
           </div>
           <h2 style={{ fontSize: "clamp(24px, 3.5vw, 32px)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 8px" }}>
-            Now let's build it together
+            The journey, step by step
           </h2>
           <p style={{ fontSize: 15, color: "#5a5a60", margin: "0 0 40px", lineHeight: 1.5 }}>
-            Each step shows what the applicant sees — and which design patterns make it work.
+            Each step shows what the applicant sees and which design patterns Sarah used.
           </p>
         </FadeIn>
 
@@ -774,10 +774,10 @@ export default function BlueBadgeStory() {
             }}
           >
             <h3 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 6px" }}>
-              The bits that tie it all together
+              On every page
             </h3>
             <p style={{ fontSize: 14, color: "#5a5a60", margin: "0 0 14px" }}>
-              These components appear on every single page, keeping things familiar:
+              These components appear on every page of the service:
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {SCAFFOLDING_PATTERNS.map((p, i) => (
@@ -823,7 +823,7 @@ export default function BlueBadgeStory() {
             }}
           >
             <h3 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 20px" }}>
-              And that's it — here's what Sarah built
+              What Sarah built
             </h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 20 }}>
               {[
@@ -847,11 +847,11 @@ export default function BlueBadgeStory() {
         <FadeIn>
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontSize: "clamp(24px, 4vw, 32px)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.15, margin: "0 0 12px" }}>
-              Fancy building something like this?
+              Start building
             </h2>
             <p style={{ fontSize: 16, lineHeight: 1.6, color: "#5a5a60", margin: "0 auto 28px", maxWidth: 460 }}>
-              Everything Sarah used is free, open source, and documented.
-              You can start right now — here's where to begin:
+              Every pattern Sarah used is open source, documented, and tested
+              with real users.
             </p>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
