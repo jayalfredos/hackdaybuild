@@ -234,72 +234,47 @@ export default function BlueBadgeStory() {
         <div style={{ position: "absolute", bottom: -80, left: "20%", width: 400, height: 400, borderRadius: "50%", background: "rgba(255,255,255,0.03)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", top: "30%", right: "15%", width: 150, height: 150, borderRadius: "50%", background: "rgba(255,255,255,0.05)", pointerEvents: "none" }} />
 
-        <div style={{ maxWidth: 960, margin: "0 auto", position: "relative", display: "grid", gridTemplateColumns: "1fr auto", gap: 48, alignItems: "center" }}>
-          <div>
-            <FadeIn>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  background: "rgba(255,255,255,0.12)",
-                  borderRadius: 100,
-                  padding: "6px 16px",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: "rgba(255,255,255,0.85)",
-                  marginBottom: 24,
-                  border: "1px solid rgba(255,255,255,0.15)",
-                }}
-              >
-                From requirement to design pattern
-              </div>
-            </FadeIn>
-
-            <FadeIn delay={0.1}>
-              <h1
-                style={{
-                  fontSize: "clamp(32px, 5vw, 52px)",
-                  fontWeight: 700,
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1.1,
-                  margin: "0 0 20px",
-                }}
-              >
-                "I need to build a Blue Badge application service"
-              </h1>
-            </FadeIn>
-
-            <FadeIn delay={0.2}>
-              <p style={{ fontSize: "clamp(16px, 2vw, 19px)", lineHeight: 1.6, color: "rgba(255,255,255,0.8)", margin: 0, maxWidth: 520 }}>
-                Sarah is a council service officer. She described what she needed
-                in plain English. The GOV.UK Design System had a pattern for every one.
-              </p>
-            </FadeIn>
-          </div>
-
-          {/* Hero visual — mini pattern cards */}
-          <FadeIn delay={0.3}>
-            <div style={{ display: "grid", gap: 8, width: 220 }}>
-              {["Radios", "Task list", "Date input", "File upload", "Error summary", "Confirmation"].map((name, i) => (
-                <div key={i} style={{
-                  background: "rgba(255,255,255,0.1)",
-                  backdropFilter: "blur(8px)",
-                  borderRadius: 8,
-                  padding: "8px 14px",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: "#fff",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: ACCENTS[i].mid, flexShrink: 0 }} />
-                  {name}
-                </div>
-              ))}
+        <div style={{ maxWidth: 960, margin: "0 auto", position: "relative" }}>
+          <FadeIn>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "rgba(255,255,255,0.12)",
+                borderRadius: 100,
+                padding: "6px 16px",
+                fontSize: 13,
+                fontWeight: 500,
+                color: "rgba(255,255,255,0.85)",
+                marginBottom: 24,
+                border: "1px solid rgba(255,255,255,0.15)",
+              }}
+            >
+              From requirement to design pattern
             </div>
+          </FadeIn>
+
+          <FadeIn delay={0.1}>
+            <h1
+              style={{
+                fontSize: "clamp(32px, 5vw, 52px)",
+                fontWeight: 700,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
+                margin: "0 0 20px",
+                maxWidth: 700,
+              }}
+            >
+              "I need to build a Blue Badge application service"
+            </h1>
+          </FadeIn>
+
+          <FadeIn delay={0.2}>
+            <p style={{ fontSize: "clamp(16px, 2vw, 19px)", lineHeight: 1.6, color: "rgba(255,255,255,0.8)", margin: 0, maxWidth: 560 }}>
+              Sarah is a council service officer. She described what she needed
+              in plain English. The GOV.UK Design System had a pattern for every one.
+            </p>
           </FadeIn>
         </div>
       </section>
