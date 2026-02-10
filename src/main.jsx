@@ -5,7 +5,7 @@ import BlueBadgeStory from "../BlueBadgeStory.jsx";
 import "./index.css";
 
 function App() {
-  const [page, setPage] = useState("search");
+  const [page, setPage] = useState("story");
 
   const navStyle = (active) => ({
     padding: "8px 18px",
