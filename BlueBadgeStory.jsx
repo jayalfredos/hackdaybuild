@@ -484,6 +484,112 @@ export default function BlueBadgeStory() {
         </FadeIn>
       </section>
 
+      {/* ── The Service Story ─────────────────────────────────────── */}
+      <section style={{ maxWidth: 680, margin: "0 auto", padding: "60px 24px 0" }}>
+        <FadeIn>
+          <p style={{ fontSize: 14, fontWeight: 600, color: "#4c2c92", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 12px" }}>
+            The service story
+          </p>
+          <h2 style={{ fontSize: "clamp(24px, 3.5vw, 32px)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.2, margin: "0 0 20px" }}>
+            What is a Blue Badge?
+          </h2>
+          <p style={{ fontSize: 17, lineHeight: 1.65, color: "#424245", margin: "0 0 24px" }}>
+            A Blue Badge lets people with disabilities or health conditions park closer to their destination.
+            Over 2.35 million people in the UK rely on one. Until recently, applying meant paper forms, trips
+            to the council office, and weeks of waiting.
+          </p>
+        </FadeIn>
+
+        {/* Service context cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 32 }}>
+          {[
+            { figure: "2.35m", label: "badge holders in the UK", color: "#1d70b8" },
+            { figure: "152", label: "local councils issue them", color: "#4c2c92" },
+            { figure: "3 years", label: "standard badge duration", color: "#00703c" },
+          ].map((card, i) => (
+            <FadeIn key={i} delay={i * 0.08}>
+              <div style={{ background: "#f5f5f7", borderRadius: 14, padding: "20px", textAlign: "center" }}>
+                <div style={{ fontSize: 32, fontWeight: 700, color: card.color, letterSpacing: "-0.02em" }}>{card.figure}</div>
+                <div style={{ fontSize: 13, color: "#6e6e73", marginTop: 4, fontWeight: 500 }}>{card.label}</div>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+
+        {/* The challenge */}
+        <FadeIn>
+          <div style={{
+            background: "linear-gradient(135deg, #1a1d23 0%, #1d3557 100%)",
+            borderRadius: 16,
+            padding: "28px 28px",
+            color: "#fff",
+            marginBottom: 32,
+          }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 12px" }}>The challenge</h3>
+            <p style={{ fontSize: 15, lineHeight: 1.6, color: "rgba(255,255,255,0.75)", margin: 0 }}>
+              Sarah's council wants to replace the paper process with a digital service that's fast,
+              accessible, and works on any device. The service must handle eligibility checks, personal
+              details, medical evidence, photo uploads, and a final review — all while being simple
+              enough for anyone to use.
+            </p>
+          </div>
+        </FadeIn>
+
+        {/* User groups */}
+        <FadeIn>
+          <h3 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 16px", letterSpacing: "-0.01em" }}>Who applies?</h3>
+        </FadeIn>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, marginBottom: 32 }}>
+          {[
+            { icon: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z", label: "The person themselves", detail: "Applying for their own badge" },
+            { icon: "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z", label: "A carer or family member", detail: "On behalf of someone else" },
+            { icon: "M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z", label: "An organisation", detail: "Care homes, charities, councils" },
+          ].map((user, i) => (
+            <FadeIn key={i} delay={i * 0.08}>
+              <div style={{ background: "#f5f5f7", borderRadius: 12, padding: "18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 8 }}>
+                <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#e8f0fe", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="#1d70b8"><path d={user.icon} /></svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700 }}>{user.label}</div>
+                  <div style={{ fontSize: 13, color: "#86868b", marginTop: 2 }}>{user.detail}</div>
+                </div>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+
+        {/* Design approach */}
+        <FadeIn>
+          <div style={{
+            background: "#f5f5f7",
+            borderRadius: 16,
+            padding: "24px 28px",
+            borderLeft: "4px solid #00703c",
+          }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 10px" }}>Sarah's approach</h3>
+            <div style={{ display: "grid", gap: 10 }}>
+              {[
+                { step: "Start with user needs", desc: "Not technology, not internal processes" },
+                { step: "Use the GOV.UK Design System", desc: "Tested patterns, not custom code" },
+                { step: "One thing per page", desc: "Keep each step simple and focused" },
+                { step: "Test with real users", desc: "Iterate based on what people actually do" },
+              ].map((item, i) => (
+                <div key={i} style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
+                  <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#00703c", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+                    {i + 1}
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 15, fontWeight: 600 }}>{item.step}</span>
+                    <span style={{ fontSize: 14, color: "#6e6e73" }}> — {item.desc}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeIn>
+      </section>
+
       {/* ── User Needs — visual grid ──────────────────────────────── */}
       <section style={{ maxWidth: 680, margin: "0 auto", padding: "60px 24px 0" }}>
         <FadeIn>
