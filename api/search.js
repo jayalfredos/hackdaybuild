@@ -1,6 +1,8 @@
 // Vercel Serverless Function — proxies semantic search to Anthropic API
 // Set ANTHROPIC_API_KEY in Vercel Environment Variables
 
+export const config = { runtime: "edge" };
+
 const PATTERNS = [
   { idx: 0, name: "Accordion", system: "GOV.UK", category: "Components", desc: "Let users show and hide sections of related content on a page." },
   { idx: 1, name: "Back link", system: "GOV.UK", category: "Components", desc: "Navigation link that takes users back to the previous page." },
@@ -59,28 +61,37 @@ const PATTERNS = [
   { idx: 54, name: "Sortable table", system: "MOJ", category: "Components", desc: "Sort tabular data by clicking column headers." },
 ];
 
-export default async function handler(req, res) {
-  // CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
+export default async function handler(request) {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 200 });
   }
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  if (request.method !== "POST") {
+    return json({ error: "Method not allowed" }, 405);
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "ANTHROPIC_API_KEY not configured" });
+    return json({ error: "ANTHROPIC_API_KEY not configured — add it in Vercel Environment Variables" }, 500);
   }
 
-  const { query } = req.body;
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "Invalid JSON body" }, 400);
+  }
+
+  const { query } = body;
   if (!query || typeof query !== "string" || query.trim().length === 0) {
-    return res.status(400).json({ error: "Missing or empty query" });
+    return json({ error: "Missing or empty query" }, 400);
   }
 
   const patternSummaries = PATTERNS.map(
@@ -117,10 +128,15 @@ Respond with ONLY a JSON array like [3,7,12,0,5] — no other text.`,
     });
 
     if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      return res.status(502).json({
-        error: err?.error?.message || `Anthropic API error: ${response.status}`,
-      });
+      const errBody = await response.text();
+      let errMsg;
+      try {
+        const parsed = JSON.parse(errBody);
+        errMsg = parsed?.error?.message || `Anthropic API error: ${response.status}`;
+      } catch {
+        errMsg = `Anthropic API error: ${response.status} — ${errBody.slice(0, 200)}`;
+      }
+      return json({ error: errMsg }, 502);
     }
 
     const data = await response.json();
@@ -128,15 +144,15 @@ Respond with ONLY a JSON array like [3,7,12,0,5] — no other text.`,
     const match = text.match(/\[[\d,\s]+\]/);
 
     if (!match) {
-      return res.status(502).json({ error: "Unexpected response format from API" });
+      return json({ error: "Unexpected response format from API", raw: text.slice(0, 200) }, 502);
     }
 
     const indices = JSON.parse(match[0])
       .filter((i) => i >= 0 && i < PATTERNS.length)
       .slice(0, 5);
 
-    return res.status(200).json({ indices });
+    return json({ indices });
   } catch (err) {
-    return res.status(502).json({ error: err.message });
+    return json({ error: `Request failed: ${err.message}` }, 502);
   }
 }

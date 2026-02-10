@@ -138,24 +138,24 @@ function fallbackSearch(query) {
 // ─── API Status Check ───────────────────────────────────────────────────────
 // status: "checking" | "ok" | "error"
 function useApiStatus() {
-  const [status, setStatus] = useState({ state: "checking", message: "Checking API...", model: null });
+  const [status, setStatus] = useState({ state: "checking", message: "Checking API...", model: null, maskedKey: null });
 
   useEffect(() => {
     let cancelled = false;
     async function check() {
       try {
         const res = await fetch("/api/status");
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) throw new Error(`/api/status returned HTTP ${res.status} — check Vercel function logs`);
         const data = await res.json();
         if (cancelled) return;
         if (data.status === "ok") {
-          setStatus({ state: "ok", message: `Connected — ${data.model}`, model: data.model });
+          setStatus({ state: "ok", message: `Connected — ${data.model}`, model: data.model, maskedKey: data.maskedKey });
         } else {
-          setStatus({ state: "error", message: data.message, model: null });
+          setStatus({ state: "error", message: data.message, model: null, maskedKey: data.maskedKey || null });
         }
       } catch (err) {
         if (cancelled) return;
-        setStatus({ state: "error", message: err.message, model: null });
+        setStatus({ state: "error", message: err.message, model: null, maskedKey: null });
       }
     }
     check();
@@ -270,9 +270,12 @@ export default function GDSPatternSearch() {
               : `API offline — keyword search only`}
         </div>
         {apiStatus.state === "error" && (
-          <p style={{ fontSize: 12, color: "#ff3b30", margin: "0 0 8px" }}>
-            {apiStatus.message}
-          </p>
+          <div style={{ fontSize: 12, color: "#ff3b30", margin: "0 0 8px", lineHeight: 1.5 }}>
+            <p style={{ margin: 0 }}>{apiStatus.message}</p>
+            {apiStatus.maskedKey && (
+              <p style={{ margin: "2px 0 0", color: "#86868b" }}>Key: {apiStatus.maskedKey}</p>
+            )}
+          </div>
         )}
 
         <h1
