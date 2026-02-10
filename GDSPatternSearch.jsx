@@ -135,6 +135,36 @@ function fallbackSearch(query) {
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────────
+// ─── API Status Check ───────────────────────────────────────────────────────
+// status: "checking" | "ok" | "error"
+function useApiStatus() {
+  const [status, setStatus] = useState({ state: "checking", message: "Checking API...", model: null });
+
+  useEffect(() => {
+    let cancelled = false;
+    async function check() {
+      try {
+        const res = await fetch("/api/status");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.status === "ok") {
+          setStatus({ state: "ok", message: `Connected — ${data.model}`, model: data.model });
+        } else {
+          setStatus({ state: "error", message: data.message, model: null });
+        }
+      } catch (err) {
+        if (cancelled) return;
+        setStatus({ state: "error", message: err.message, model: null });
+      }
+    }
+    check();
+    return () => { cancelled = true; };
+  }, []);
+
+  return status;
+}
+
 export default function GDSPatternSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState(null);
@@ -142,6 +172,7 @@ export default function GDSPatternSearch() {
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState("All");
   const inputRef = useRef(null);
+  const apiStatus = useApiStatus();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -222,12 +253,27 @@ export default function GDSPatternSearch() {
               width: 8,
               height: 8,
               borderRadius: "50%",
-              background: "#34c759",
+              background:
+                apiStatus.state === "ok"
+                  ? "#34c759"
+                  : apiStatus.state === "error"
+                    ? "#ff3b30"
+                    : "#ffcc00",
               display: "inline-block",
+              animation: apiStatus.state === "checking" ? "pulse 1.2s ease infinite" : "none",
             }}
           />
-          {PATTERNS.length} patterns indexed
+          {apiStatus.state === "checking"
+            ? "Checking API..."
+            : apiStatus.state === "ok"
+              ? `API connected — ${PATTERNS.length} patterns`
+              : `API offline — keyword search only`}
         </div>
+        {apiStatus.state === "error" && (
+          <p style={{ fontSize: 12, color: "#ff3b30", margin: "0 0 8px" }}>
+            {apiStatus.message}
+          </p>
+        )}
 
         <h1
           style={{
@@ -601,6 +647,10 @@ export default function GDSPatternSearch() {
           to {
             transform: rotate(360deg);
           }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
         }
         ::placeholder {
           color: #c7c7cc;
