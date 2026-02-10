@@ -299,14 +299,14 @@ export default function BlueBadgeStory() {
         <FadeIn>
           <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 40 }}>
             <div style={{ height: 1, flex: 1, background: "#e5e5e5" }} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#5a5a60" }}>6 needs, 6 patterns</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#5a5a60" }}>6 requirements, 6 patterns</span>
             <div style={{ height: 1, flex: 1, background: "#e5e5e5" }} />
           </div>
         </FadeIn>
 
         {PATTERNS.map((item, i) => (
           <FadeIn key={i} style={{ marginBottom: i < PATTERNS.length - 1 ? 56 : 0 }}>
-            {/* The need — Sarah's words */}
+            {/* The requirement — Sarah's words */}
             <div
               style={{
                 background: "#f8f8fa",
@@ -317,7 +317,7 @@ export default function BlueBadgeStory() {
               }}
             >
               <div style={{ fontSize: 11, fontWeight: 600, color: "#2a5a8a", marginBottom: 6, letterSpacing: "0.02em" }}>
-                Sarah's need #{i + 1}
+                Sarah's requirement #{i + 1}
               </div>
               <p style={{ fontSize: 17, lineHeight: 1.6, color: "#1d1d1f", margin: 0, fontStyle: "italic" }}>
                 "{item.need}"
@@ -367,35 +367,121 @@ export default function BlueBadgeStory() {
         ))}
       </section>
 
-      {/* ── The point ─────────────────────────────────────────────── */}
+      {/* ── What Sarah created ─────────────────────────────────────── */}
       <section style={{ maxWidth: 640, margin: "0 auto", padding: "64px 24px 0" }}>
+        <FadeIn>
+          <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em", margin: "0 0 14px" }}>
+            What Sarah created
+          </h2>
+          <p style={{ fontSize: 17, lineHeight: 1.7, color: "#3d3d40", margin: "0 0 24px" }}>
+            Sarah described her requirements in plain English. Each one mapped directly
+            to a pattern in the GOV.UK Design System — researched, tested, and ready to use.
+          </p>
+        </FadeIn>
+
+        {/* Requirements → patterns summary table */}
+        <FadeIn>
+          <div style={{ borderRadius: 14, border: "1px solid #e5e5e5", overflow: "hidden", marginBottom: 28 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", padding: "12px 20px", background: "#f8f8fa", borderBottom: "1px solid #e5e5e5", fontSize: 12, fontWeight: 700, color: "#5a5a60" }}>
+              <span>Her requirement</span>
+              <span></span>
+              <span>The pattern</span>
+            </div>
+            {PATTERNS.map((item, i) => (
+              <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", padding: "12px 20px", borderBottom: i < PATTERNS.length - 1 ? "1px solid #f0f0f0" : "none", alignItems: "center" }}>
+                <span style={{ fontSize: 14, color: "#3d3d40", lineHeight: 1.4 }}>{item.need.replace(/^I need to |^People need to |^People will |^There are |^At the end, people need to /i, "").replace(/\.$/, "")}</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ margin: "0 8px" }}><path d="M3 8h8m0 0L7.5 4.5M11 8l-3.5 3.5" stroke="#b1b4b6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, fontWeight: 600, color: "#1d70b8", textDecoration: "none" }}>{item.pattern}</a>
+              </div>
+            ))}
+          </div>
+        </FadeIn>
+
+        {/* Stats */}
         <FadeIn>
           <div
             style={{
               background: "linear-gradient(135deg, #2a5a8a 0%, #1d3557 50%, #6b5b95 100%)",
-              borderRadius: 20,
-              padding: "36px 32px",
+              borderRadius: 16,
+              padding: "28px 28px",
               color: "#fff",
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 20,
             }}
           >
-            <h3 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 12px" }}>
-              The point
-            </h3>
-            <p style={{ fontSize: 16, lineHeight: 1.65, color: "rgba(255,255,255,0.85)", margin: "0 0 24px" }}>
-              Sarah described what she needed in plain sentences. Every one of them
-              mapped to a pattern that already existed — researched, tested, and ready to use.
-              She didn't design a single component from scratch.
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+            {[
+              { n: 6, label: "requirements" },
+              { n: 6, label: "patterns matched" },
+              { n: 0, label: "designed from scratch" },
+            ].map((stat, i) => (
+              <div key={i} style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-0.02em" }}>{stat.n}</div>
+                <div style={{ fontSize: 13, color: "rgba(255,255,255,0.6)" }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </FadeIn>
+      </section>
+
+      {/* ── Context: Blue Badge stats + scaffolding ────────────────── */}
+      <section style={{ maxWidth: 640, margin: "0 auto", padding: "48px 24px 0" }}>
+        {/* Service stats — discreet row */}
+        <FadeIn>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 28 }}>
+            {[
+              { figure: "2.35m", label: "badge holders in the UK", bg: "#eef4fb", color: "#2a5a8a" },
+              { figure: "152", label: "councils issue them", bg: "#f3f0fa", color: "#6b5b95" },
+              { figure: "3 yrs", label: "standard badge duration", bg: "#eaf5ee", color: "#2e7d4f" },
+            ].map((card, i) => (
+              <div key={i} style={{ background: card.bg, borderRadius: 12, padding: "16px 14px", textAlign: "center" }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: card.color }}>{card.figure}</div>
+                <div style={{ fontSize: 12, color: "#5a5a60", marginTop: 2 }}>{card.label}</div>
+              </div>
+            ))}
+          </div>
+        </FadeIn>
+
+        {/* Scaffolding patterns — discreet */}
+        <FadeIn>
+          <div style={{ background: "#f8f8fa", borderRadius: 14, padding: "20px 22px" }}>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
+              Also on every page
+            </div>
+            <div style={{ fontSize: 14, color: "#5a5a60", marginBottom: 12, lineHeight: 1.45 }}>
+              These components provide the consistent frame around Sarah's service:
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {[
-                { n: 6, label: "needs described" },
-                { n: 6, label: "patterns matched" },
-                { n: 0, label: "designed from scratch" },
-              ].map((stat, i) => (
-                <div key={i}>
-                  <div style={{ fontSize: 36, fontWeight: 700, letterSpacing: "-0.02em" }}>{stat.n}</div>
-                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.6)" }}>{stat.label}</div>
-                </div>
+                { name: "Header", url: "https://design-system.service.gov.uk/components/header/" },
+                { name: "Footer", url: "https://design-system.service.gov.uk/components/footer/" },
+                { name: "Phase banner", url: "https://design-system.service.gov.uk/components/phase-banner/" },
+                { name: "Back link", url: "https://design-system.service.gov.uk/components/back-link/" },
+                { name: "Skip link", url: "https://design-system.service.gov.uk/components/skip-link/" },
+                { name: "Notification banner", url: "https://design-system.service.gov.uk/components/notification-banner/" },
+              ].map((p, i) => (
+                <a
+                  key={i}
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "inline-block",
+                    textDecoration: "none",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "#1d70b8",
+                    background: "#fff",
+                    padding: "5px 12px",
+                    borderRadius: 6,
+                    border: "1px solid #e5e5e5",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#1d70b8"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e5e5e5"; }}
+                >
+                  {p.name}
+                </a>
               ))}
             </div>
           </div>
