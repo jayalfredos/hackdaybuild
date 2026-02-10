@@ -89,24 +89,67 @@ const CATEGORY_ICONS = {
   ),
 };
 
-// ─── Semantic Search via server-side API route ──────────────────────────────
-async function semanticSearch(query) {
-  const response = await fetch("/api/search", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
-  });
+// ─── Semantic Search via direct Anthropic API call ──────────────────────────
+const MODELS_TO_TRY = [
+  "claude-sonnet-4-5-20250929",
+  "claude-3-5-sonnet-20241022",
+  "claude-3-haiku-20240307",
+];
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err?.error || `Server error: ${response.status}`);
+async function semanticSearch(query, apiKey) {
+  if (!apiKey) throw new Error("No API key");
+
+  const patternSummaries = PATTERNS.map(
+    (p, i) => `[${i}] ${p.name} (${p.system} / ${p.category}): ${p.description}`
+  ).join("\n");
+
+  const prompt = `You are a UK Government Design System expert. A user is searching for design patterns/components.
+
+Their query: "${query}"
+
+Available patterns:
+${patternSummaries}
+
+Return ONLY the indices of the top 5 most relevant patterns as a JSON array of numbers, ordered by relevance. Consider semantic meaning, not just keyword matching.
+
+Respond with ONLY a JSON array like [3,7,12,0,5] — no other text.`;
+
+  // Try each model until one works
+  for (const model of MODELS_TO_TRY) {
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 256,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+
+      if (!response.ok) continue; // try next model
+
+      const data = await response.json();
+      const text = data.content?.[0]?.text || "[]";
+      const match = text.match(/\[[\d,\s]+\]/);
+      if (!match) continue;
+
+      const indices = JSON.parse(match[0]);
+      return indices
+        .filter((i) => i >= 0 && i < PATTERNS.length)
+        .slice(0, 5)
+        .map((i) => PATTERNS[i]);
+    } catch {
+      continue;
+    }
   }
 
-  const { indices } = await response.json();
-  return indices
-    .filter((i) => i >= 0 && i < PATTERNS.length)
-    .slice(0, 5)
-    .map((i) => PATTERNS[i]);
+  throw new Error("All models failed — check your API key");
 }
 
 // ─── Fuzzy fallback (no API key) ────────────────────────────────────────────
@@ -135,77 +178,16 @@ function fallbackSearch(query) {
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────────
-// ─── API Status Check ───────────────────────────────────────────────────────
-// status: "checking" | "ok" | "error"
-function useApiStatus() {
-  const [status, setStatus] = useState({ state: "checking", message: "Checking API...", model: null, maskedKey: null, details: null });
-
-  useEffect(() => {
-    let cancelled = false;
-    async function check() {
-      try {
-        const res = await fetch("/api/status");
-
-        // If we got HTML back instead of JSON, the function isn't deployed
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-          const body = await res.text();
-          if (cancelled) return;
-          setStatus({
-            state: "error",
-            message: `/api/status returned ${contentType || "no content-type"} instead of JSON — Edge function not deployed. Check Vercel build logs.`,
-            model: null,
-            maskedKey: null,
-            details: body.slice(0, 200),
-          });
-          return;
-        }
-
-        const data = await res.json();
-        if (cancelled) return;
-        if (data.status === "ok") {
-          setStatus({
-            state: "ok",
-            message: `Connected — ${data.workingModel}`,
-            model: data.workingModel,
-            maskedKey: data.maskedKey,
-            details: data.modelTests,
-          });
-        } else {
-          setStatus({
-            state: "error",
-            message: data.message,
-            model: null,
-            maskedKey: data.maskedKey || null,
-            details: data.modelTests || null,
-          });
-        }
-      } catch (err) {
-        if (cancelled) return;
-        setStatus({
-          state: "error",
-          message: `Failed to reach /api/status: ${err.message}`,
-          model: null,
-          maskedKey: null,
-          details: null,
-        });
-      }
-    }
-    check();
-    return () => { cancelled = true; };
-  }, []);
-
-  return status;
-}
-
 export default function GDSPatternSearch() {
   const [query, setQuery] = useState("");
+  const [apiKey, setApiKey] = useState("");
+  const [showKeyInput, setShowKeyInput] = useState(false);
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState("All");
+  const [searchMode, setSearchMode] = useState(null); // "semantic" | "keyword"
   const inputRef = useRef(null);
-  const apiStatus = useApiStatus();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -220,18 +202,26 @@ export default function GDSPatternSearch() {
       setLoading(true);
       setError(null);
       setResults(null);
+      setSearchMode(null);
 
-      try {
-        const matches = await semanticSearch(trimmed);
-        setResults(matches);
-      } catch (err) {
-        setError(err.message);
+      if (apiKey.trim()) {
+        try {
+          const matches = await semanticSearch(trimmed, apiKey.trim());
+          setSearchMode("semantic");
+          setResults(matches);
+        } catch (err) {
+          setError(err.message);
+          setSearchMode("keyword");
+          setResults(fallbackSearch(trimmed));
+        }
+      } else {
+        setSearchMode("keyword");
         setResults(fallbackSearch(trimmed));
-      } finally {
-        setLoading(false);
       }
+
+      setLoading(false);
     },
-    [query]
+    [query, apiKey]
   );
 
   const filteredResults = results
@@ -286,45 +276,14 @@ export default function GDSPatternSearch() {
               width: 8,
               height: 8,
               borderRadius: "50%",
-              background:
-                apiStatus.state === "ok"
-                  ? "#34c759"
-                  : apiStatus.state === "error"
-                    ? "#ff3b30"
-                    : "#ffcc00",
+              background: apiKey.trim() ? "#34c759" : "#ffcc00",
               display: "inline-block",
-              animation: apiStatus.state === "checking" ? "pulse 1.2s ease infinite" : "none",
             }}
           />
-          {apiStatus.state === "checking"
-            ? "Checking API..."
-            : apiStatus.state === "ok"
-              ? `API connected — ${PATTERNS.length} patterns`
-              : `API offline — keyword search only`}
+          {apiKey.trim()
+            ? `Semantic search — ${PATTERNS.length} patterns`
+            : `Keyword search — ${PATTERNS.length} patterns`}
         </div>
-        {apiStatus.state === "error" && (
-          <div style={{ fontSize: 12, color: "#ff3b30", margin: "0 0 12px", lineHeight: 1.6, textAlign: "left", maxWidth: 520, marginLeft: "auto", marginRight: "auto" }}>
-            <p style={{ margin: 0, fontWeight: 600 }}>{apiStatus.message}</p>
-            {apiStatus.maskedKey && (
-              <p style={{ margin: "4px 0 0", color: "#86868b" }}>Key: {apiStatus.maskedKey}</p>
-            )}
-            {apiStatus.details && Array.isArray(apiStatus.details) && (
-              <div style={{ marginTop: 8, background: "#fafafa", borderRadius: 8, padding: "8px 12px", border: "1px solid #e5e5e5" }}>
-                <p style={{ margin: "0 0 4px", color: "#1d1d1f", fontWeight: 600 }}>Model test results:</p>
-                {apiStatus.details.map((t, i) => (
-                  <p key={i} style={{ margin: "2px 0", color: t.status === "ok" ? "#34c759" : "#86868b" }}>
-                    {t.status === "ok" ? "\u2713" : "\u2717"} {t.model}{t.error ? ` — ${t.error}` : ""}
-                  </p>
-                ))}
-              </div>
-            )}
-            {apiStatus.details && typeof apiStatus.details === "string" && (
-              <p style={{ margin: "4px 0 0", color: "#86868b", fontFamily: "monospace", fontSize: 11 }}>
-                Response: {apiStatus.details}
-              </p>
-            )}
-          </div>
-        )}
 
         <h1
           style={{
@@ -454,9 +413,64 @@ export default function GDSPatternSearch() {
           </div>
         </form>
 
-        <p style={{ textAlign: "center", marginTop: 12, fontSize: 13, color: "#86868b" }}>
-          Powered by Claude — semantic search across {PATTERNS.length} patterns
-        </p>
+        {/* ── Subtle API Key ────────────────────────────────────── */}
+        <div style={{ textAlign: "center", marginTop: 14 }}>
+          <button
+            onClick={() => setShowKeyInput(!showKeyInput)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#86868b",
+              fontSize: 13,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              padding: "4px 8px",
+              borderRadius: 6,
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={(e) => (e.target.style.color = "#1d70b8")}
+            onMouseLeave={(e) => (e.target.style.color = "#86868b")}
+          >
+            {apiKey.trim()
+              ? "Semantic search active"
+              : "Enable semantic search"}
+            <span style={{ marginLeft: 4, fontSize: 10 }}>{showKeyInput ? "\u25B2" : "\u25BC"}</span>
+          </button>
+
+          <div
+            style={{
+              overflow: "hidden",
+              maxHeight: showKeyInput ? 80 : 0,
+              opacity: showKeyInput ? 1 : 0,
+              transition: "all 0.3s ease",
+            }}
+          >
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="sk-ant-..."
+              style={{
+                marginTop: 8,
+                width: "100%",
+                maxWidth: 400,
+                padding: "10px 14px",
+                border: "1px solid #d2d2d7",
+                borderRadius: 10,
+                fontSize: 14,
+                fontFamily: "inherit",
+                outline: "none",
+                background: "#fafafa",
+                transition: "border-color 0.15s",
+              }}
+              onFocus={(e) => (e.target.style.borderColor = "#1d70b8")}
+              onBlur={(e) => (e.target.style.borderColor = "#d2d2d7")}
+            />
+            <p style={{ fontSize: 12, color: "#86868b", margin: "6px 0 0" }}>
+              Paste your Anthropic API key for AI-powered search
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* ── Results ────────────────────────────────────────────────── */}
