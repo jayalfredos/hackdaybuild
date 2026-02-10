@@ -3,6 +3,15 @@
 
 export const config = { runtime: "edge" };
 
+// Models to try in order — first success wins
+const MODELS = [
+  "claude-sonnet-4-5-20250929",
+  "claude-sonnet-4-20250514",
+  "claude-3-5-sonnet-20241022",
+  "claude-3-5-haiku-20241022",
+  "claude-3-haiku-20240307",
+];
+
 const PATTERNS = [
   { idx: 0, name: "Accordion", system: "GOV.UK", category: "Components", desc: "Let users show and hide sections of related content on a page." },
   { idx: 1, name: "Back link", system: "GOV.UK", category: "Components", desc: "Navigation link that takes users back to the previous page." },
@@ -98,21 +107,7 @@ export default async function handler(request) {
     (p) => `[${p.idx}] ${p.name} (${p.system} / ${p.category}): ${p.desc}`
   ).join("\n");
 
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-5-20250929",
-        max_tokens: 256,
-        messages: [
-          {
-            role: "user",
-            content: `You are a UK Government Design System expert. A user is searching for design patterns/components.
+  const prompt = `You are a UK Government Design System expert. A user is searching for design patterns/components.
 
 Their query: "${query.trim().replace(/"/g, '\\"')}"
 
@@ -121,38 +116,62 @@ ${patternSummaries}
 
 Return ONLY the indices of the top 5 most relevant patterns as a JSON array of numbers, ordered by relevance. Consider semantic meaning, not just keyword matching.
 
-Respond with ONLY a JSON array like [3,7,12,0,5] — no other text.`,
-          },
-        ],
-      }),
-    });
+Respond with ONLY a JSON array like [3,7,12,0,5] — no other text.`;
 
-    if (!response.ok) {
-      const errBody = await response.text();
-      let errMsg;
-      try {
-        const parsed = JSON.parse(errBody);
-        errMsg = parsed?.error?.message || `Anthropic API error: ${response.status}`;
-      } catch {
-        errMsg = `Anthropic API error: ${response.status} — ${errBody.slice(0, 200)}`;
+  // Try each model until one works
+  const errors = [];
+  for (const model of MODELS) {
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 256,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+
+      if (!response.ok) {
+        const errBody = await response.text();
+        let errMsg;
+        try {
+          const parsed = JSON.parse(errBody);
+          errMsg = parsed?.error?.message || `HTTP ${response.status}`;
+        } catch {
+          errMsg = `HTTP ${response.status}: ${errBody.slice(0, 100)}`;
+        }
+        errors.push({ model, error: errMsg });
+        continue; // Try next model
       }
-      return json({ error: errMsg }, 502);
+
+      const data = await response.json();
+      const text = data.content?.[0]?.text || "[]";
+      const match = text.match(/\[[\d,\s]+\]/);
+
+      if (!match) {
+        errors.push({ model, error: `Bad response: ${text.slice(0, 100)}` });
+        continue;
+      }
+
+      const indices = JSON.parse(match[0])
+        .filter((i) => i >= 0 && i < PATTERNS.length)
+        .slice(0, 5);
+
+      return json({ indices, model: data.model });
+    } catch (err) {
+      errors.push({ model, error: err.message });
+      continue;
     }
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text || "[]";
-    const match = text.match(/\[[\d,\s]+\]/);
-
-    if (!match) {
-      return json({ error: "Unexpected response format from API", raw: text.slice(0, 200) }, 502);
-    }
-
-    const indices = JSON.parse(match[0])
-      .filter((i) => i >= 0 && i < PATTERNS.length)
-      .slice(0, 5);
-
-    return json({ indices });
-  } catch (err) {
-    return json({ error: `Request failed: ${err.message}` }, 502);
   }
+
+  // All models failed
+  return json({
+    error: `All ${MODELS.length} models failed`,
+    attempts: errors,
+  }, 502);
 }

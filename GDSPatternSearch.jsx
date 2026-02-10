@@ -138,24 +138,57 @@ function fallbackSearch(query) {
 // ─── API Status Check ───────────────────────────────────────────────────────
 // status: "checking" | "ok" | "error"
 function useApiStatus() {
-  const [status, setStatus] = useState({ state: "checking", message: "Checking API...", model: null, maskedKey: null });
+  const [status, setStatus] = useState({ state: "checking", message: "Checking API...", model: null, maskedKey: null, details: null });
 
   useEffect(() => {
     let cancelled = false;
     async function check() {
       try {
         const res = await fetch("/api/status");
-        if (!res.ok) throw new Error(`/api/status returned HTTP ${res.status} — check Vercel function logs`);
+
+        // If we got HTML back instead of JSON, the function isn't deployed
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          const body = await res.text();
+          if (cancelled) return;
+          setStatus({
+            state: "error",
+            message: `/api/status returned ${contentType || "no content-type"} instead of JSON — Edge function not deployed. Check Vercel build logs.`,
+            model: null,
+            maskedKey: null,
+            details: body.slice(0, 200),
+          });
+          return;
+        }
+
         const data = await res.json();
         if (cancelled) return;
         if (data.status === "ok") {
-          setStatus({ state: "ok", message: `Connected — ${data.model}`, model: data.model, maskedKey: data.maskedKey });
+          setStatus({
+            state: "ok",
+            message: `Connected — ${data.workingModel}`,
+            model: data.workingModel,
+            maskedKey: data.maskedKey,
+            details: data.modelTests,
+          });
         } else {
-          setStatus({ state: "error", message: data.message, model: null, maskedKey: data.maskedKey || null });
+          setStatus({
+            state: "error",
+            message: data.message,
+            model: null,
+            maskedKey: data.maskedKey || null,
+            details: data.modelTests || null,
+          });
         }
       } catch (err) {
         if (cancelled) return;
-        setStatus({ state: "error", message: err.message, model: null, maskedKey: null });
+        setStatus({
+          state: "error",
+          message: `Failed to reach /api/status: ${err.message}`,
+          model: null,
+          maskedKey: null,
+          details: null,
+        });
       }
     }
     check();
@@ -270,10 +303,25 @@ export default function GDSPatternSearch() {
               : `API offline — keyword search only`}
         </div>
         {apiStatus.state === "error" && (
-          <div style={{ fontSize: 12, color: "#ff3b30", margin: "0 0 8px", lineHeight: 1.5 }}>
-            <p style={{ margin: 0 }}>{apiStatus.message}</p>
+          <div style={{ fontSize: 12, color: "#ff3b30", margin: "0 0 12px", lineHeight: 1.6, textAlign: "left", maxWidth: 520, marginLeft: "auto", marginRight: "auto" }}>
+            <p style={{ margin: 0, fontWeight: 600 }}>{apiStatus.message}</p>
             {apiStatus.maskedKey && (
-              <p style={{ margin: "2px 0 0", color: "#86868b" }}>Key: {apiStatus.maskedKey}</p>
+              <p style={{ margin: "4px 0 0", color: "#86868b" }}>Key: {apiStatus.maskedKey}</p>
+            )}
+            {apiStatus.details && Array.isArray(apiStatus.details) && (
+              <div style={{ marginTop: 8, background: "#fafafa", borderRadius: 8, padding: "8px 12px", border: "1px solid #e5e5e5" }}>
+                <p style={{ margin: "0 0 4px", color: "#1d1d1f", fontWeight: 600 }}>Model test results:</p>
+                {apiStatus.details.map((t, i) => (
+                  <p key={i} style={{ margin: "2px 0", color: t.status === "ok" ? "#34c759" : "#86868b" }}>
+                    {t.status === "ok" ? "\u2713" : "\u2717"} {t.model}{t.error ? ` — ${t.error}` : ""}
+                  </p>
+                ))}
+              </div>
+            )}
+            {apiStatus.details && typeof apiStatus.details === "string" && (
+              <p style={{ margin: "4px 0 0", color: "#86868b", fontFamily: "monospace", fontSize: 11 }}>
+                Response: {apiStatus.details}
+              </p>
             )}
           </div>
         )}
